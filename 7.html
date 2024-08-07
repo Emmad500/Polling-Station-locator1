@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nearest Polling Station Locator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            margin: 20px;
+        }
+        button {
+            padding: 15px 25px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Find Your Nearest Polling Station in Karachi for PEC Election 2024</h1>
+    <button type="button" onclick="findNearestStation()">Find Nearest Station</button>
+    <h1>Please Vote for Dr. Sarosh Hashmat Lodi for the post of Senior Vice Chairman</h1>
+
+    <script>
+        const stations = [
+            { name: "123", lat: 20.88466, lng: 68.14671 }
+        ];
+
+        function findNearestStation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success, error, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
+        function success(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            let nearestStation = null;
+            let minDistance = Infinity;
+
+            for (let station of stations) {
+                const distance = getDistanceFromLatLonInKm(userLat, userLng, station.lat, station.lng);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestStation = station;
+                }
+            }
+
+            if (nearestStation) {
+                const directionsLink = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${nearestStation.lat},${nearestStation.lng}&travelmode=driving`;
+                window.open(directionsLink, "_blank");
+            }
+        }
+
+        function error(err) {
+            if (err.code === err.PERMISSION_DENIED) {
+                alert("You have denied the request for geolocation. Please enable location access to find your nearest polling station.");
+            } else {
+                alert(`ERROR(${err.code}): ${err.message}`);
+            }
+        }
+
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the earth in km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c; // Distance in km
+            return distance;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180);
+        }
+    </script>
+</body>
+</html>
